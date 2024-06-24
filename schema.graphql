@@ -1,62 +1,48 @@
-type Approval @entity(immutable: true) {
+type Token @entity {
   id: Bytes!
-  owner: Bytes! # address
-  spender: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  name: String!
+  decimals: BigInt!
 }
 
-type Burn @entity(immutable: true) {
+type Pool @entity {
   id: Bytes!
-  sender: Bytes! # address
-  amount0: BigInt! # uint256
-  amount1: BigInt! # uint256
-  to: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  tokens: [Token!]!
+  # References to the previous swap/liquidity event, used to attach block numbers later on
+  prevSwap: Swap
+  prevLiquidity: Liquidity
 }
 
-type Mint @entity(immutable: true) {
+type Swap @entity {
   id: Bytes!
-  sender: Bytes! # address
-  amount0: BigInt! # uint256
-  amount1: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  pool: Pool!
+  "The block number in which the next Swap in this pool occurs. Must be updated later once that event is encountered"
+  nextEventBlock: BigInt!
+
+  prevPrice: [BigInt!]!
+  prevReserves: [BigInt!]!
+
+  newPrice: [BigInt!]!
+  newReserves: [BigInt!]!
+
+  percentPriceChange: BigDecimal!
+  percentReserveChange: BigDecimal!
 }
 
-type Swap @entity(immutable: true) {
+type Liquidity @entity {
   id: Bytes!
-  sender: Bytes! # address
-  amount0In: BigInt! # uint256
-  amount1In: BigInt! # uint256
-  amount0Out: BigInt! # uint256
-  amount1Out: BigInt! # uint256
-  to: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
+  pool: Pool!
+  "The block number in which the next Liquidity in this pool occurs. Must be updated later once that event is encountered"
+  nextEventBlock: BigInt!
 
-type Sync @entity(immutable: true) {
-  id: Bytes!
-  reserve0: BigInt! # uint112
-  reserve1: BigInt! # uint112
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
+  prevPrice: [BigInt!]!
+  prevReserves: [BigInt!]!
+  prevLpSupply: BigInt!
 
-type Transfer @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  to: Bytes! # address
-  value: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  newPrice: [BigInt!]!
+  newReserves: [BigInt!]!
+  newLpSupply: BigInt!
+
+  percentPriceChange: BigDecimal!
+  percentReserveChange: BigDecimal!
+  percentLpSupplyChange: BigDecimal!
 }

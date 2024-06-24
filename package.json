@@ -1,13 +1,10 @@
 {
-  "name": "mf1.1",
+  "name": "multiflow",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ mf1.1",
-    "create-local": "graph create --node http://localhost:8020/ mf1.1",
-    "remove-local": "graph remove --node http://localhost:8020/ mf1.1",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 mf1.1",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ multiflow",
     "test": "graph test"
   },
   "dependencies": {
