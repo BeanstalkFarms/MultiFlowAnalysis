@@ -1,95 +1,10 @@
 import { newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts"
 import {
-  Approval,
-  Burn,
-  Mint,
   Swap,
   Sync,
   Transfer
 } from "../generated/uniswap/uniswap"
-
-export function createApprovalEvent(
-  owner: Address,
-  spender: Address,
-  value: BigInt
-): Approval {
-  let approvalEvent = changetype<Approval>(newMockEvent())
-
-  approvalEvent.parameters = new Array()
-
-  approvalEvent.parameters.push(
-    new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
-  approvalEvent.parameters.push(
-    new ethereum.EventParam("spender", ethereum.Value.fromAddress(spender))
-  )
-  approvalEvent.parameters.push(
-    new ethereum.EventParam("value", ethereum.Value.fromUnsignedBigInt(value))
-  )
-
-  return approvalEvent
-}
-
-export function createBurnEvent(
-  sender: Address,
-  amount0: BigInt,
-  amount1: BigInt,
-  to: Address
-): Burn {
-  let burnEvent = changetype<Burn>(newMockEvent())
-
-  burnEvent.parameters = new Array()
-
-  burnEvent.parameters.push(
-    new ethereum.EventParam("sender", ethereum.Value.fromAddress(sender))
-  )
-  burnEvent.parameters.push(
-    new ethereum.EventParam(
-      "amount0",
-      ethereum.Value.fromUnsignedBigInt(amount0)
-    )
-  )
-  burnEvent.parameters.push(
-    new ethereum.EventParam(
-      "amount1",
-      ethereum.Value.fromUnsignedBigInt(amount1)
-    )
-  )
-  burnEvent.parameters.push(
-    new ethereum.EventParam("to", ethereum.Value.fromAddress(to))
-  )
-
-  return burnEvent
-}
-
-export function createMintEvent(
-  sender: Address,
-  amount0: BigInt,
-  amount1: BigInt
-): Mint {
-  let mintEvent = changetype<Mint>(newMockEvent())
-
-  mintEvent.parameters = new Array()
-
-  mintEvent.parameters.push(
-    new ethereum.EventParam("sender", ethereum.Value.fromAddress(sender))
-  )
-  mintEvent.parameters.push(
-    new ethereum.EventParam(
-      "amount0",
-      ethereum.Value.fromUnsignedBigInt(amount0)
-    )
-  )
-  mintEvent.parameters.push(
-    new ethereum.EventParam(
-      "amount1",
-      ethereum.Value.fromUnsignedBigInt(amount1)
-    )
-  )
-
-  return mintEvent
-}
 
 export function createSwapEvent(
   sender: Address,

@@ -1,6 +1,6 @@
 enum EventType {
-  SWAP
-  LIQUIDITY
+  Swap
+  Liquidity
 }
 
 type Token @entity {
