@@ -1,48 +1,68 @@
+enum EventType {
+  SWAP
+  LIQUIDITY
+}
+
 type Token @entity {
-  id: Bytes!
+  id: ID!
   name: String!
   decimals: BigInt!
 }
 
 type Pool @entity {
-  id: Bytes!
+  id: ID!
   tokens: [Token!]!
   # References to the previous swap/liquidity event, used to attach block numbers later on
   prevSwap: Swap
   prevLiquidity: Liquidity
+
+  prevEvent: ID
+  prevEventType: EventType
 }
 
 type Swap @entity {
-  id: Bytes!
+  "${txn hash}-${log index}"
+  id: ID!
   pool: Pool!
   "The block number in which the next Swap in this pool occurs. Must be updated later once that event is encountered"
   nextEventBlock: BigInt!
 
-  prevPrice: [BigInt!]!
-  prevReserves: [BigInt!]!
+  prevPrice: [BigDecimal!]
+  prevReserves: [BigInt!]
 
-  newPrice: [BigInt!]!
+  newPrice: [BigDecimal!]!
   newReserves: [BigInt!]!
 
-  percentPriceChange: BigDecimal!
-  percentReserveChange: BigDecimal!
+  percentPriceChange0: BigDecimal
+  percentPriceChange1: BigDecimal
+  percentReserveChange0: BigDecimal
+  percentReserveChange1: BigDecimal
+
+  txHash: String!
 }
 
 type Liquidity @entity {
-  id: Bytes!
+  "${txn hash}-${log index}"
+  id: ID!
   pool: Pool!
   "The block number in which the next Liquidity in this pool occurs. Must be updated later once that event is encountered"
   nextEventBlock: BigInt!
 
-  prevPrice: [BigInt!]!
-  prevReserves: [BigInt!]!
-  prevLpSupply: BigInt!
+  prevPrice: [BigDecimal!]
+  prevReserves: [BigInt!]
+  prevLpSupply: BigInt
 
-  newPrice: [BigInt!]!
+  newPrice: [BigDecimal!]!
   newReserves: [BigInt!]!
   newLpSupply: BigInt!
 
-  percentPriceChange: BigDecimal!
-  percentReserveChange: BigDecimal!
-  percentLpSupplyChange: BigDecimal!
+  # Separated these into 0/1 because this will make it easier to query compared to if it was in a list
+  percentPriceChange0: BigDecimal
+  percentPriceChange1: BigDecimal
+  percentReserveChange0: BigDecimal
+  percentReserveChange1: BigDecimal
+
+  percentLpSupplyChange: BigDecimal
+
+  txHash: String!
 }

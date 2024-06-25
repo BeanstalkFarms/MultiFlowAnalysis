@@ -1,102 +1,71 @@
+import { BigDecimal } from "@graphprotocol/graph-ts"
+import { Liquidity, Pool, Swap } from "../generated/schema"
 import {
-  Approval as ApprovalEvent,
-  Burn as BurnEvent,
-  Mint as MintEvent,
   Swap as SwapEvent,
   Sync as SyncEvent,
   Transfer as TransferEvent
 } from "../generated/uniswap/uniswap"
-import { Approval, Burn, Mint, Swap, Sync, Transfer } from "../generated/schema"
+import { handleLpTokenChange } from "./utils/Liquidity"
+import { loadOrCreateToken, toDecimal } from "./utils/Token"
+import { handleSwapEntity } from "./utils/Swap"
 
-export function handleApproval(event: ApprovalEvent): void {
-  let entity = new Approval(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.owner = event.params.owner
-  entity.spender = event.params.spender
-  entity.value = event.params.value
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleBurn(event: BurnEvent): void {
-  let entity = new Burn(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.sender = event.params.sender
-  entity.amount0 = event.params.amount0
-  entity.amount1 = event.params.amount1
-  entity.to = event.params.to
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleMint(event: MintEvent): void {
-  let entity = new Mint(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.sender = event.params.sender
-  entity.amount0 = event.params.amount0
-  entity.amount1 = event.params.amount1
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
+// For trades
 export function handleSwap(event: SwapEvent): void {
-  let entity = new Swap(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.sender = event.params.sender
-  entity.amount0In = event.params.amount0In
-  entity.amount1In = event.params.amount1In
-  entity.amount0Out = event.params.amount0Out
-  entity.amount1Out = event.params.amount1Out
-  entity.to = event.params.to
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  handleSwapEntity(event.address.toHexString(), event);
 }
 
-export function handleSync(event: SyncEvent): void {
-  let entity = new Sync(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.reserve0 = event.params.reserve0
-  entity.reserve1 = event.params.reserve1
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
+// For add/remove liquidity
 export function handleTransfer(event: TransferEvent): void {
-  let entity = new Transfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.to = event.params.to
-  entity.value = event.params.value
+  if (event.params.from.toHexString() == "0x0000000000000000000000000000000000000000") {
+    // Mint
+    handleLpTokenChange(event.address.toHexString(), event.params.value, event);
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  } else if (event.params.to.toHexString() == "0x0000000000000000000000000000000000000000") {
+    // Burn
+    handleLpTokenChange(event.address.toHexString(), event.params.value.neg(), event);
+  }
+}
 
-  entity.save()
+// For tracking all actual reserve changes
+export function handleSync(event: SyncEvent): void {
+  let pool = Pool.load(event.address.toHexString())!;
+  if (pool.prevEventType == "Swap") {
+
+    let swap = Swap.load(pool.prevEvent!)!;
+    const reserve0 = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
+    const reserve1 = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
+
+    swap.newPrice = [reserve1.div(reserve0), reserve0.div(reserve1)];
+    swap.newReserves = [event.params.reserve0, event.params.reserve1];
+
+    // Calculate the percent changes
+    if (swap.prevPrice != null && swap.prevReserves != null) {
+      swap.percentPriceChange0 = swap.newPrice[0].minus(swap.prevPrice[0]).div(swap.prevPrice[0]);
+      swap.percentPriceChange1 = swap.newPrice[1].minus(swap.prevPrice[1]).div(swap.prevPrice[1]);
+      swap.percentReserveChange0 = (new BigDecimal(swap.newReserves[0].minus(swap.prevReserves[0]))).div(
+        (new BigDecimal(swap.prevReserves[0])));
+        swap.percentReserveChange1 = (new BigDecimal(swap.newReserves[1].minus(swap.prevReserves[1]))).div(
+        (new BigDecimal(swap.prevReserves[1])));
+    }
+    swap.save();
+
+  } else if (pool.prevEventType == "Liquidity") {
+    let liquidity = Liquidity.load(pool.prevEvent!)!;
+    const reserve0 = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
+    const reserve1 = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
+
+    liquidity.newPrice = [reserve1.div(reserve0), reserve0.div(reserve1)];
+    liquidity.newReserves = [event.params.reserve0, event.params.reserve1];
+
+    // Calculate the percent changes
+    if (liquidity.prevPrice != null && liquidity.prevReserves != null) {
+      liquidity.percentPriceChange0 = liquidity.newPrice[0].minus(liquidity.prevPrice[0]).div(liquidity.prevPrice[0]);
+      liquidity.percentPriceChange1 = liquidity.newPrice[1].minus(liquidity.prevPrice[1]).div(liquidity.prevPrice[1]);
+      liquidity.percentReserveChange0 = (new BigDecimal(liquidity.newReserves[0].minus(liquidity.prevReserves[0]))).div(
+        (new BigDecimal(liquidity.prevReserves[0])));
+      liquidity.percentReserveChange1 = (new BigDecimal(liquidity.newReserves[1].minus(liquidity.prevReserves[1]))).div(
+        (new BigDecimal(liquidity.prevReserves[1])));
+    }
+    liquidity.save();
+  }
 }
