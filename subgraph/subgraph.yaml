@@ -1,0 +1,33 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: wethusdc
+    network: mainnet
+    source:
+      address: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc"
+      abi: uniswap
+      startBlock: 10008355
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Pool
+        - Swap
+        - Liquidity
+      abis:
+        - name: uniswap
+          file: ./abis/uniswap.json
+      eventHandlers:
+        - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleSwap
+        - event: Sync(uint112,uint112)
+          handler: handleSync
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/uniswap.ts
