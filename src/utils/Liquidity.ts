@@ -8,16 +8,17 @@ export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: 
   if (pool.prevLiquidity != null) {
     prevEntity = Liquidity.load(pool.prevLiquidity!)!;
     prevEntity.nextEventBlock = event.block.number;
+    prevEntity.blockDiff = prevEntity.nextEventBlock!.minus(prevEntity.eventBlock);
     prevEntity.save();
   }
 
   let entity = createLiquidityEntity(event);
   entity.pool = pool.id;
-  entity.nextEventBlock = BigInt.fromI64(999999999999999);
+  entity.eventBlock = event.block.number;
 
   if (prevEntity) {
-    entity.prevPrice = prevEntity.newPrice;
-    entity.prevReserves = prevEntity.newReserves;
+    entity.prevPrice = pool.price;
+    entity.prevReserves = pool.reserves;
     entity.prevLpSupply = prevEntity.newLpSupply;
 
     entity.newLpSupply = entity.prevLpSupply!.plus(amount);

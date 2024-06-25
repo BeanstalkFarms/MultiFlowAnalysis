@@ -52,6 +52,8 @@ export function handleSync(event: SyncEvent): void {
         (new BigDecimal(liquidity.prevReserves![1])));
     }
     liquidity.save();
+
+    pool.price = liquidity.newPrice;
   }
   pool.prevEventType = null;
   pool.save();

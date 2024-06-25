@@ -12,6 +12,7 @@ type Token @entity {
 type Pool @entity {
   id: ID!
   tokens: [Token!]!
+  price: [BigDecimal!]
   reserves: [BigInt!]
 
   # References to the previous swap/liquidity event, used to attach block numbers later on
@@ -26,8 +27,10 @@ type Swap @entity {
   "${txn hash}-${log index}"
   id: ID!
   pool: Pool!
+  eventBlock: BigInt!
   "The block number in which the next Swap in this pool occurs. Must be updated later once that event is encountered"
-  nextEventBlock: BigInt!
+  nextEventBlock: BigInt
+  blockDiff: BigInt
 
   prevPrice: [BigDecimal!]
   prevReserves: [BigInt!]
@@ -47,8 +50,10 @@ type Liquidity @entity {
   "${txn hash}-${log index}"
   id: ID!
   pool: Pool!
+  eventBlock: BigInt!
   "The block number in which the next Liquidity in this pool occurs. Must be updated later once that event is encountered"
-  nextEventBlock: BigInt!
+  nextEventBlock: BigInt
+  blockDiff: BigInt
 
   prevPrice: [BigDecimal!]
   prevReserves: [BigInt!]

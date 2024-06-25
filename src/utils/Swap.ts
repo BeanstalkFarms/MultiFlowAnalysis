@@ -10,26 +10,27 @@ export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   if (pool.prevSwap != null) {
     prevEntity = Swap.load(pool.prevSwap!)!;
     prevEntity.nextEventBlock = event.block.number;
+    prevEntity.blockDiff = prevEntity.nextEventBlock!.minus(prevEntity.eventBlock);
     prevEntity.save();
   }
 
   let entity = createSwapEntity(event);
   entity.pool = pool.id;
-  entity.nextEventBlock = BigInt.fromI64(999999999999999);
+  entity.eventBlock = event.block.number;
 
-  if (prevEntity) {
-    entity.prevPrice = prevEntity.newPrice;
-    entity.prevReserves = prevEntity.newReserves;
+  if (pool.price) {
+    entity.prevPrice = pool.price;
+    entity.prevReserves = pool.reserves;
   }
 
-  const reserve0bd = toDecimal(pool.reserves[0], loadOrCreateToken(pool.tokens[0]).decimals.toI32());
-  const reserve1bd = toDecimal(pool.reserves[1], loadOrCreateToken(pool.tokens[1]).decimals.toI32());
+  const reserve0bd = toDecimal(pool.reserves![0], loadOrCreateToken(pool.tokens[0]).decimals.toI32());
+  const reserve1bd = toDecimal(pool.reserves![1], loadOrCreateToken(pool.tokens[1]).decimals.toI32());
 
   entity.newPrice = [reserve1bd.div(reserve0bd), reserve0bd.div(reserve1bd)];
   entity.newReserves = pool.reserves;
 
   // Calculate the percent changes
-  if (prevEntity) {
+  if (pool.price && pool.reserves) {
     entity.percentPriceChange0 = entity.newPrice![0].minus(entity.prevPrice![0]).div(entity.prevPrice![0]);
     entity.percentPriceChange1 = entity.newPrice![1].minus(entity.prevPrice![1]).div(entity.prevPrice![1]);
     entity.percentReserveChange0 = (new BigDecimal(entity.newReserves![0].minus(entity.prevReserves![0]))).div(
@@ -41,6 +42,7 @@ export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   entity.txHash = event.transaction.hash.toHexString();
   entity.save();
 
+  pool.price = entity.newPrice;
   pool.prevSwap = entity.id;
   pool.prevEvent = entity.id;
   pool.prevEventType = "Swap";
