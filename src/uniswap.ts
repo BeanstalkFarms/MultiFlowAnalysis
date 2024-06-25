@@ -9,6 +9,10 @@ import { handleLpTokenChange } from "./utils/Liquidity"
 import { loadOrCreateToken, toDecimal } from "./utils/Token"
 import { handleSwapEntity } from "./utils/Swap"
 
+/// For Swaps, the event order is Sync -> Swap. Use Sync to update reserves only, do all calculation in Swap.
+/// For Liquidity, the event order is Transfer -> Sync -> Mint | Burn. Use Transfer to identify
+///   how many lp tokens are transacted, and Sync to perform any relevant reserve/price calculations.   
+
 // For trades
 export function handleSwap(event: SwapEvent): void {
   handleSwapEntity(event.address.toHexString(), event);
@@ -29,33 +33,14 @@ export function handleTransfer(event: TransferEvent): void {
 // For tracking all actual reserve changes
 export function handleSync(event: SyncEvent): void {
   let pool = Pool.load(event.address.toHexString())!;
-  if (pool.prevEventType == "Swap") {
-
-    let swap = Swap.load(pool.prevEvent!)!;
-    const reserve0 = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
-    const reserve1 = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
-
-    swap.newPrice = [reserve1.div(reserve0), reserve0.div(reserve1)];
-    swap.newReserves = [event.params.reserve0, event.params.reserve1];
-
-    // Calculate the percent changes
-    if (swap.prevPrice != null && swap.prevReserves != null) {
-      swap.percentPriceChange0 = swap.newPrice![0].minus(swap.prevPrice![0]).div(swap.prevPrice![0]);
-      swap.percentPriceChange1 = swap.newPrice![1].minus(swap.prevPrice![1]).div(swap.prevPrice![1]);
-      swap.percentReserveChange0 = (new BigDecimal(swap.newReserves![0].minus(swap.prevReserves![0]))).div(
-        (new BigDecimal(swap.prevReserves![0])));
-        swap.percentReserveChange1 = (new BigDecimal(swap.newReserves![1].minus(swap.prevReserves![1]))).div(
-        (new BigDecimal(swap.prevReserves![1])));
-    }
-    swap.save();
-
-  } else if (pool.prevEventType == "Liquidity") {
+  pool.reserves = [event.params.reserve0, event.params.reserve1];
+  if (pool.prevEventType == "Liquidity") {
     let liquidity = Liquidity.load(pool.prevEvent!)!;
-    const reserve0 = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
-    const reserve1 = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
+    const reserve0bd = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
+    const reserve1bd = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
 
-    liquidity.newPrice = [reserve1.div(reserve0), reserve0.div(reserve1)];
-    liquidity.newReserves = [event.params.reserve0, event.params.reserve1];
+    liquidity.newPrice = [reserve1bd.div(reserve0bd), reserve0bd.div(reserve1bd)];
+    liquidity.newReserves = pool.reserves;
 
     // Calculate the percent changes
     if (liquidity.prevPrice != null && liquidity.prevReserves != null) {
@@ -68,4 +53,6 @@ export function handleSync(event: SyncEvent): void {
     }
     liquidity.save();
   }
+  pool.prevEventType = null;
+  pool.save();
 }
