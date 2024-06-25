@@ -12,7 +12,7 @@ type Token @entity {
 type Pool @entity {
   id: ID!
   tokens: [Token!]!
-  reserves: [BigInt!]!
+  reserves: [BigInt!]
 
   # References to the previous swap/liquidity event, used to attach block numbers later on
   prevSwap: Swap
