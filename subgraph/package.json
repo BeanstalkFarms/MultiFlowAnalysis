@@ -4,7 +4,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ multiflow",
+    "deploy": "graph deploy --studio multiflow11",
     "test": "graph test"
   },
   "dependencies": {

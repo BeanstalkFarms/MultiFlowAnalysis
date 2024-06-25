@@ -22,7 +22,7 @@ dataSources:
         - Liquidity
       abis:
         - name: uniswap
-          file: ./abis/uniswap.json
+          file: ../abis/uniswap.json
       eventHandlers:
         - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
           handler: handleSwap

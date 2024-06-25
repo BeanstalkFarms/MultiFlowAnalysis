@@ -4,6 +4,8 @@ import { Swap } from "../../generated/schema";
 import { Swap as SwapEvent } from "../../generated/uniswap/uniswap"
 import { loadOrCreateToken, toDecimal } from "./Token";
 
+const BD_100 = BigDecimal.fromString("100");
+
 export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   let pool = loadOrCreatePool(poolAddress);
   let prevEntity: Swap | null = null;
@@ -18,25 +20,23 @@ export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   entity.pool = pool.id;
   entity.eventBlock = event.block.number;
 
-  if (pool.price) {
-    entity.prevPrice = pool.price;
-    entity.prevReserves = pool.reserves;
+  if (pool.prevPrice) {
+    entity.prevPrice = pool.prevPrice;
+    entity.prevReserves = pool.prevReserves;
   }
 
-  const reserve0bd = toDecimal(pool.reserves![0], loadOrCreateToken(pool.tokens[0]).decimals.toI32());
-  const reserve1bd = toDecimal(pool.reserves![1], loadOrCreateToken(pool.tokens[1]).decimals.toI32());
-
-  entity.newPrice = [reserve1bd.div(reserve0bd), reserve0bd.div(reserve1bd)];
+  // This will have been set by the preceding Sync event
+  entity.newPrice = pool.price;
   entity.newReserves = pool.reserves;
 
   // Calculate the percent changes
-  if (pool.price && pool.reserves) {
-    entity.percentPriceChange0 = entity.newPrice![0].minus(entity.prevPrice![0]).div(entity.prevPrice![0]);
-    entity.percentPriceChange1 = entity.newPrice![1].minus(entity.prevPrice![1]).div(entity.prevPrice![1]);
+  if (pool.prevPrice && pool.prevReserves) {
+    entity.percentPriceChange0 = entity.newPrice![0].minus(entity.prevPrice![0]).div(entity.prevPrice![0]).times(BD_100);
+    entity.percentPriceChange1 = entity.newPrice![1].minus(entity.prevPrice![1]).div(entity.prevPrice![1]).times(BD_100);
     entity.percentReserveChange0 = (new BigDecimal(entity.newReserves![0].minus(entity.prevReserves![0]))).div(
-      (new BigDecimal(entity.prevReserves![0])));
+      (new BigDecimal(entity.prevReserves![0]))).times(BD_100);
     entity.percentReserveChange1 = (new BigDecimal(entity.newReserves![1].minus(entity.prevReserves![1]))).div(
-      (new BigDecimal(entity.prevReserves![1])));
+      (new BigDecimal(entity.prevReserves![1]))).times(BD_100);
   }
 
   entity.txHash = event.transaction.hash.toHexString();

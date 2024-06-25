@@ -2,6 +2,8 @@ import { BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { loadOrCreatePool } from "./Pool";
 import { Liquidity } from "../../generated/schema";
 
+const BD_100 = BigDecimal.fromString("100");
+
 export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: ethereum.Event): void {
   let pool = loadOrCreatePool(poolAddress);
   let prevEntity: Liquidity | null = null;
@@ -22,7 +24,7 @@ export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: 
     entity.prevLpSupply = prevEntity.newLpSupply;
 
     entity.newLpSupply = entity.prevLpSupply!.plus(amount);
-    entity.percentLpSupplyChange = (new BigDecimal(entity.newLpSupply.minus(entity.prevLpSupply!))).div(new BigDecimal(entity.prevLpSupply!));
+    entity.percentLpSupplyChange = (new BigDecimal(entity.newLpSupply.minus(entity.prevLpSupply!))).div(new BigDecimal(entity.prevLpSupply!)).times(BD_100);
   } else {
     entity.newLpSupply = amount;
   }

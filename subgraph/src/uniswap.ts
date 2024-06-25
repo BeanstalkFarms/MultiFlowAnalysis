@@ -13,6 +13,8 @@ import { handleSwapEntity } from "./utils/Swap"
 /// For Liquidity, the event order is Transfer -> Sync -> Mint | Burn. Use Transfer to identify
 ///   how many lp tokens are transacted, and Sync to perform any relevant reserve/price calculations.   
 
+const BD_100 = BigDecimal.fromString("100");
+
 // For trades
 export function handleSwap(event: SwapEvent): void {
   handleSwapEntity(event.address.toHexString(), event);
@@ -33,27 +35,29 @@ export function handleTransfer(event: TransferEvent): void {
 // For tracking all actual reserve changes
 export function handleSync(event: SyncEvent): void {
   let pool = Pool.load(event.address.toHexString())!;
+  pool.prevPrice = pool.price;
+  pool.prevReserves = pool.reserves;
+
+  const reserve0bd = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
+  const reserve1bd = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
+  pool.price = [reserve1bd.div(reserve0bd), reserve0bd.div(reserve1bd)];
   pool.reserves = [event.params.reserve0, event.params.reserve1];
+
   if (pool.prevEventType == "Liquidity") {
     let liquidity = Liquidity.load(pool.prevEvent!)!;
-    const reserve0bd = toDecimal(event.params.reserve0, loadOrCreateToken(pool.tokens[0]).decimals.toI32());
-    const reserve1bd = toDecimal(event.params.reserve1, loadOrCreateToken(pool.tokens[1]).decimals.toI32());
-
-    liquidity.newPrice = [reserve1bd.div(reserve0bd), reserve0bd.div(reserve1bd)];
+    liquidity.newPrice = pool.price;
     liquidity.newReserves = pool.reserves;
 
     // Calculate the percent changes
     if (liquidity.prevPrice != null && liquidity.prevReserves != null) {
-      liquidity.percentPriceChange0 = liquidity.newPrice![0].minus(liquidity.prevPrice![0]).div(liquidity.prevPrice![0]);
-      liquidity.percentPriceChange1 = liquidity.newPrice![1].minus(liquidity.prevPrice![1]).div(liquidity.prevPrice![1]);
+      liquidity.percentPriceChange0 = liquidity.newPrice![0].minus(liquidity.prevPrice![0]).div(liquidity.prevPrice![0]).times(BD_100);
+      liquidity.percentPriceChange1 = liquidity.newPrice![1].minus(liquidity.prevPrice![1]).div(liquidity.prevPrice![1]).times(BD_100);
       liquidity.percentReserveChange0 = (new BigDecimal(liquidity.newReserves![0].minus(liquidity.prevReserves![0]))).div(
-        (new BigDecimal(liquidity.prevReserves![0])));
+        (new BigDecimal(liquidity.prevReserves![0]))).times(BD_100);
       liquidity.percentReserveChange1 = (new BigDecimal(liquidity.newReserves![1].minus(liquidity.prevReserves![1]))).div(
-        (new BigDecimal(liquidity.prevReserves![1])));
+        (new BigDecimal(liquidity.prevReserves![1]))).times(BD_100);
     }
     liquidity.save();
-
-    pool.price = liquidity.newPrice;
   }
   pool.prevEventType = null;
   pool.save();
