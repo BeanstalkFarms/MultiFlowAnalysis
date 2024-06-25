@@ -40,12 +40,12 @@ export function handleSync(event: SyncEvent): void {
 
     // Calculate the percent changes
     if (swap.prevPrice != null && swap.prevReserves != null) {
-      swap.percentPriceChange0 = swap.newPrice[0].minus(swap.prevPrice[0]).div(swap.prevPrice[0]);
-      swap.percentPriceChange1 = swap.newPrice[1].minus(swap.prevPrice[1]).div(swap.prevPrice[1]);
-      swap.percentReserveChange0 = (new BigDecimal(swap.newReserves[0].minus(swap.prevReserves[0]))).div(
-        (new BigDecimal(swap.prevReserves[0])));
-        swap.percentReserveChange1 = (new BigDecimal(swap.newReserves[1].minus(swap.prevReserves[1]))).div(
-        (new BigDecimal(swap.prevReserves[1])));
+      swap.percentPriceChange0 = swap.newPrice![0].minus(swap.prevPrice![0]).div(swap.prevPrice![0]);
+      swap.percentPriceChange1 = swap.newPrice![1].minus(swap.prevPrice![1]).div(swap.prevPrice![1]);
+      swap.percentReserveChange0 = (new BigDecimal(swap.newReserves![0].minus(swap.prevReserves![0]))).div(
+        (new BigDecimal(swap.prevReserves![0])));
+        swap.percentReserveChange1 = (new BigDecimal(swap.newReserves![1].minus(swap.prevReserves![1]))).div(
+        (new BigDecimal(swap.prevReserves![1])));
     }
     swap.save();
 
@@ -59,12 +59,12 @@ export function handleSync(event: SyncEvent): void {
 
     // Calculate the percent changes
     if (liquidity.prevPrice != null && liquidity.prevReserves != null) {
-      liquidity.percentPriceChange0 = liquidity.newPrice[0].minus(liquidity.prevPrice[0]).div(liquidity.prevPrice[0]);
-      liquidity.percentPriceChange1 = liquidity.newPrice[1].minus(liquidity.prevPrice[1]).div(liquidity.prevPrice[1]);
-      liquidity.percentReserveChange0 = (new BigDecimal(liquidity.newReserves[0].minus(liquidity.prevReserves[0]))).div(
-        (new BigDecimal(liquidity.prevReserves[0])));
-      liquidity.percentReserveChange1 = (new BigDecimal(liquidity.newReserves[1].minus(liquidity.prevReserves[1]))).div(
-        (new BigDecimal(liquidity.prevReserves[1])));
+      liquidity.percentPriceChange0 = liquidity.newPrice![0].minus(liquidity.prevPrice![0]).div(liquidity.prevPrice![0]);
+      liquidity.percentPriceChange1 = liquidity.newPrice![1].minus(liquidity.prevPrice![1]).div(liquidity.prevPrice![1]);
+      liquidity.percentReserveChange0 = (new BigDecimal(liquidity.newReserves![0].minus(liquidity.prevReserves![0]))).div(
+        (new BigDecimal(liquidity.prevReserves![0])));
+      liquidity.percentReserveChange1 = (new BigDecimal(liquidity.newReserves![1].minus(liquidity.prevReserves![1]))).div(
+        (new BigDecimal(liquidity.prevReserves![1])));
     }
     liquidity.save();
   }

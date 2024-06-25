@@ -4,9 +4,9 @@ import { Liquidity } from "../../generated/schema";
 
 export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: ethereum.Event): void {
   let pool = loadOrCreatePool(poolAddress);
-  let prevEntity = null;
+  let prevEntity: Liquidity | null = null;
   if (pool.prevLiquidity != null) {
-    prevEntity = Liquidity.load(pool.prevLiquidity)!;
+    prevEntity = Liquidity.load(pool.prevLiquidity!)!;
     prevEntity.nextEventBlock = event.block.number;
     prevEntity.save();
   }
@@ -20,8 +20,8 @@ export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: 
     entity.prevReserves = prevEntity.newReserves;
     entity.prevLpSupply = prevEntity.newLpSupply;
 
-    entity.newLpSupply = entity.prevLpSupply.plus(amount);
-    entity.percentLpSupplyChange = (new BigDecimal(entity.newLpSupply.minus(entity.prevLpSupply))).div(new BigDecimal(entity.prevLpSupply));
+    entity.newLpSupply = entity.prevLpSupply!.plus(amount);
+    entity.percentLpSupplyChange = (new BigDecimal(entity.newLpSupply.minus(entity.prevLpSupply!))).div(new BigDecimal(entity.prevLpSupply!));
   } else {
     entity.newLpSupply = amount;
   }

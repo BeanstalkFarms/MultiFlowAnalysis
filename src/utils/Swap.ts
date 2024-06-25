@@ -4,9 +4,9 @@ import { Swap } from "../../generated/schema";
 
 export function handleSwapEntity(poolAddress: string, event: ethereum.Event): void {
   let pool = loadOrCreatePool(poolAddress);
-  let prevEntity = null;
+  let prevEntity: Swap | null = null;
   if (pool.prevSwap != null) {
-    prevEntity = Swap.load(pool.prevSwap)!;
+    prevEntity = Swap.load(pool.prevSwap!)!;
     prevEntity.nextEventBlock = event.block.number;
     prevEntity.save();
   }

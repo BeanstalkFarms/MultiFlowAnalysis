@@ -30,8 +30,8 @@ type Swap @entity {
   prevPrice: [BigDecimal!]
   prevReserves: [BigInt!]
 
-  newPrice: [BigDecimal!]!
-  newReserves: [BigInt!]!
+  newPrice: [BigDecimal!]
+  newReserves: [BigInt!]
 
   percentPriceChange0: BigDecimal
   percentPriceChange1: BigDecimal
@@ -52,8 +52,8 @@ type Liquidity @entity {
   prevReserves: [BigInt!]
   prevLpSupply: BigInt
 
-  newPrice: [BigDecimal!]!
-  newReserves: [BigInt!]!
+  newPrice: [BigDecimal!]
+  newReserves: [BigInt!]
   newLpSupply: BigInt!
 
   # Separated these into 0/1 because this will make it easier to query compared to if it was in a list

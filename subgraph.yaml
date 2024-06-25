@@ -16,22 +16,14 @@ dataSources:
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - Approval
-        - Burn
-        - Mint
+        - Token
+        - Pool
         - Swap
-        - Sync
-        - Transfer
+        - Liquidity
       abis:
         - name: uniswap
           file: ./abis/uniswap.json
       eventHandlers:
-        - event: Approval(indexed address,indexed address,uint256)
-          handler: handleApproval
-        - event: Burn(indexed address,uint256,uint256,indexed address)
-          handler: handleBurn
-        - event: Mint(indexed address,uint256,uint256)
-          handler: handleMint
         - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
           handler: handleSwap
         - event: Sync(uint112,uint112)
