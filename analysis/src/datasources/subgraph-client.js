@@ -19,7 +19,8 @@ function clientBuilder(url) {
 }
 
 module.exports = {
-  multiflowSG: clientBuilder('https://api.studio.thegraph.com/query/69878/multiflow11/version/latest'),
+  // multiflowSG: clientBuilder('https://api.studio.thegraph.com/query/69878/multiflow11/version/latest'),
+  multiflowSG: clientBuilder('https://graph.node.bean.money/subgraphs/name/multiflow11/'),
   urlGql: clientBuilder,
   gql,
 };

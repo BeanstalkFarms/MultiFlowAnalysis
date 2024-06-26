@@ -7,12 +7,23 @@ const fs = require('fs');
 const { providerThenable } = require("./datasources/alchemy");
 
 const USDC_WETH = "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc";
-const USDT_WETH = "0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852";
+const WETH_USDT = "0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852";
 
 const END_BLOCK = 20172395;
 // Blocks for which to produce the report
 const BLOCKS = {
   [USDC_WETH]: [
+    10200000,
+    // 10400000,
+    // 10500000,
+    // 11000000,
+    // 12000000,
+    // 13500000,
+    // 15000000,
+    // 18000000,
+    // END_BLOCK
+  ],
+  [WETH_USDT]: [
     10200000,
     // 10400000,
     // 10500000,
@@ -38,13 +49,25 @@ const PERCENT_THRESHOLDS = {
     1.5,
     2,
     5
+  ],
+  [WETH_USDT]: [
+    // 0.01,
+    // 0.05,
+    // 0.1,
+    // 0.25,
+    0.5,
+    // 0.75,
+    1,
+    1.5,
+    2,
+    5
   ]
 };
 
-function querySwapsAndLiquidity(percent, block) {
+function querySwapsAndLiquidity(pool, percent, block) {
 
   let blockQuery =`block: {number: ${block}}`;
-  blockQuery = ''; // seems that block is not working with respect to the testing subgraph
+  blockQuery = ''; // seems that block is not working on this subgraph?
 
   const swapsPromise = SubgraphQueryUtil.allPaginatedSG(
     multiflowSG,
@@ -58,8 +81,7 @@ function querySwapsAndLiquidity(percent, block) {
       }
     `,
     blockQuery,
-    // TODO
-    `pool: "${USDC_WETH}", percentPriceChange0_gt: "${percent}"`,
+    `pool: "${pool}", percentPriceChange0_gt: "${percent}"`,
     ['eventBlock'],
     [0],
     'asc'
@@ -77,8 +99,7 @@ function querySwapsAndLiquidity(percent, block) {
       }
     `,
     blockQuery,
-    // TODO
-    `pool: "${USDC_WETH}", percentLpSupplyChange_gt: "${percent}"`,
+    `pool: "${pool}", percentLpSupplyChange_gt: "${percent}"`,
     ['eventBlock'],
     [0],
     'asc'
@@ -137,8 +158,10 @@ async function queryRecentBlockTimes(provider, entities) {
 
       const reportPercent = reportPool[`percent:${percent}`] = {};
       for (const block of POOL_BLOCKS) {
+
+        process.stdout.write(`\rPool: ${poolIterations[0]} / ${poolIterations[1]} | Step: ${inPoolIterations[0]++} / ${inPoolIterations[1]}`);
     
-        const [swaps, liquidity] = await querySwapsAndLiquidity(percent, block);
+        const [swaps, liquidity] = await querySwapsAndLiquidity(pool.id, percent, block);
 
         const priceSpread = meanMedianMode(swaps, ['count', 'eventBlock', 'blockDiff']);
         const liquiditySpread = meanMedianMode(liquidity, ['count', 'eventBlock', 'blockDiff']);
@@ -180,9 +203,9 @@ async function queryRecentBlockTimes(provider, entities) {
             }
           }
         }
-        process.stdout.write(`\rPool: ${poolIterations[0]} / ${poolIterations[1]} | Step: ${inPoolIterations[0]++} / ${inPoolIterations[1]}`);
       }
     }
+    ++poolIterations[0];
   }
   await fs.promises.writeFile(`results/analysis.json`, JSON.stringify(report, null, 2));
 
