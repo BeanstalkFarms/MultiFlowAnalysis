@@ -7,6 +7,7 @@ const fs = require('fs');
 const { providerThenable } = require("./datasources/alchemy");
 
 const USDC_WETH = "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc";
+const USDT_WETH = "0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852";
 
 const END_BLOCK = 20172395;
 // Blocks for which to produce the report
@@ -57,6 +58,7 @@ function querySwapsAndLiquidity(percent, block) {
       }
     `,
     blockQuery,
+    // TODO
     `pool: "${USDC_WETH}", percentPriceChange0_gt: "${percent}"`,
     ['eventBlock'],
     [0],
@@ -75,6 +77,7 @@ function querySwapsAndLiquidity(percent, block) {
       }
     `,
     blockQuery,
+    // TODO
     `pool: "${USDC_WETH}", percentLpSupplyChange_gt: "${percent}"`,
     ['eventBlock'],
     [0],
@@ -137,8 +140,8 @@ async function queryRecentBlockTimes(provider, entities) {
     
         const [swaps, liquidity] = await querySwapsAndLiquidity(percent, block);
 
-        const priceSpread = meanAndMode(swaps, ['count', 'eventBlock', 'blockDiff']);
-        const liquiditySpread = meanAndMode(liquidity, ['count', 'eventBlock', 'blockDiff']);
+        const priceSpread = meanMedianMode(swaps, ['count', 'eventBlock', 'blockDiff']);
+        const liquiditySpread = meanMedianMode(liquidity, ['count', 'eventBlock', 'blockDiff']);
 
         const [recentPrice, recentLiquidity] = await Promise.all([
           queryRecentBlockTimes(provider, swaps),
@@ -186,7 +189,7 @@ async function queryRecentBlockTimes(provider, entities) {
 })();
 
 // Calculates the mean/median/mode of the given properties
-function meanAndMode(objects, propertyList) {
+function meanMedianMode(objects, propertyList) {
   return propertyList.reduce((result, property) => {
     const numbers = objects.map(o => parseInt(o[property]));
     result[property] = {
@@ -197,3 +200,7 @@ function meanAndMode(objects, propertyList) {
     return result;
   }, {});
 }
+
+
+// const contract = await getContractAsync(USDT_WETH, abi);
+  // console.log(await contract.callStatic.getReserves());

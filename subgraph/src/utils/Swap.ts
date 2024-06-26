@@ -1,7 +1,7 @@
 import { BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { loadOrCreatePool } from "./Pool";
 import { Swap } from "../../generated/schema";
-import { Swap as SwapEvent } from "../../generated/wethusdc/uniswap"
+import { Swap as SwapEvent } from "../../generated/usdcweth/uniswap"
 
 const BD_100 = BigDecimal.fromString("100");
 

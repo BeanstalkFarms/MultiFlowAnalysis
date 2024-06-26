@@ -5,7 +5,7 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: wethusdc
+    name: usdcweth
     network: mainnet
     source:
       address: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc"
@@ -31,3 +31,32 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/uniswap.ts
+  - kind: ethereum
+    name: wethusdt
+    network: mainnet
+    source:
+      address: "0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852"
+      abi: uniswap
+      startBlock: 10093341
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - Pool
+        - Swap
+        - Liquidity
+      abis:
+        - name: uniswap
+          file: ../abis/uniswap.json
+      eventHandlers:
+        - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleSwap
+        - event: Sync(uint112,uint112)
+          handler: handleSync
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/uniswap.ts
+
+
