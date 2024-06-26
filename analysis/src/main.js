@@ -31,9 +31,9 @@ const PERCENT_THRESHOLDS = {
     // 0.05,
     // 0.1,
     // 0.25,
-    // 0.5,
+    0.5,
     // 0.75,
-    // 1,
+    1,
     1.5,
     2,
     5
@@ -117,6 +117,8 @@ async function queryRecentBlockTimes(provider, entities) {
         liquidityCount
       }
     }`)).pools;
+
+  const poolIterations = [1, pools.length];
   
   for (const pool of pools) {
 
@@ -124,6 +126,10 @@ async function queryRecentBlockTimes(provider, entities) {
 
     const POOL_BLOCKS = BLOCKS[pool.id];
     const POOL_PERCENTS = PERCENT_THRESHOLDS[pool.id];
+
+    // For logging the current progress
+    const inPoolIterations = [1, POOL_PERCENTS.length * POOL_BLOCKS.length];
+
     for (const percent of POOL_PERCENTS) {
 
       const reportPercent = reportPool[`percent:${percent}`] = {};
@@ -171,6 +177,7 @@ async function queryRecentBlockTimes(provider, entities) {
             }
           }
         }
+        process.stdout.write(`\rPool: ${poolIterations[0]} / ${poolIterations[1]} | Step: ${inPoolIterations[0]++} / ${inPoolIterations[1]}`);
       }
     }
   }
