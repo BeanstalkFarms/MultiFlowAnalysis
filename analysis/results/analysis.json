@@ -3,31 +3,43 @@
     "percent:1.5": {
       "end-block:10200000": {
         "price": {
-          "count": 97,
-          "total": 11707,
-          "percent": 0.8285641069445632,
+          "count": 369,
+          "total": 112667,
+          "percent": 0.32751382392359785,
           "analysis": {
-            "meanCount": 3207.9278350515465,
-            "medianCount": 944,
-            "meanBlock": 10148729.113402061,
-            "medianBlock": 10110971,
-            "meanBlockDiff": 185.71134020618555,
-            "medianBlockDiff": 1,
-            "modeBlockDiff": 0
+            "meanCount": 40075.439024390245,
+            "medianCount": 27914,
+            "meanBlock": 10375099.47696477,
+            "medianBlock": 10369979,
+            "meanBlockDiff": 49.170731707317074,
+            "medianBlockDiff": 0,
+            "modeBlockDiff": 0,
+            "recentOccurrences": {
+              "-1": "2020-08-08T21:59:40.000Z",
+              "-10": "2020-08-05T16:31:02.000Z",
+              "-50": "2020-07-30T04:10:57.000Z",
+              "-100": "2020-07-25T18:02:22.000Z"
+            }
           }
         },
         "liquidity": {
-          "count": 69,
-          "total": 879,
-          "percent": 7.849829351535837,
+          "count": 138,
+          "total": 2693,
+          "percent": 5.124396583735611,
           "analysis": {
-            "meanCount": 165.6231884057971,
-            "medianCount": 60,
-            "meanBlock": 10104977.11594203,
-            "medianBlock": 10095564,
-            "meanBlockDiff": 1051.623188405797,
-            "medianBlockDiff": 126,
-            "modeBlockDiff": 163
+            "meanCount": 933.2971014492754,
+            "medianCount": 869,
+            "meanBlock": 10284568.601449275,
+            "medianBlock": 10284223.5,
+            "meanBlockDiff": 612.8768115942029,
+            "medianBlockDiff": 128,
+            "modeBlockDiff": 34,
+            "recentOccurrences": {
+              "-1": "2020-08-07T18:13:57.000Z",
+              "-10": "2020-08-01T17:37:46.000Z",
+              "-50": "2020-07-06T10:12:16.000Z",
+              "-100": "2020-05-19T13:51:09.000Z"
+            }
           }
         }
       }
@@ -35,31 +47,43 @@
     "percent:2": {
       "end-block:10200000": {
         "price": {
-          "count": 66,
-          "total": 11707,
-          "percent": 0.5637652686426924,
+          "count": 222,
+          "total": 112667,
+          "percent": 0.1970408371572865,
           "analysis": {
-            "meanCount": 2247.5151515151515,
-            "medianCount": 676,
-            "meanBlock": 10127784.712121213,
-            "medianBlock": 10105793.5,
-            "meanBlockDiff": 270.3030303030303,
-            "medianBlockDiff": 1,
-            "modeBlockDiff": 0
+            "meanCount": 39070.06756756757,
+            "medianCount": 26821,
+            "meanBlock": 10362422.905405406,
+            "medianBlock": 10363557.5,
+            "meanBlockDiff": 80.64864864864865,
+            "medianBlockDiff": 0,
+            "modeBlockDiff": 0,
+            "recentOccurrences": {
+              "-1": "2020-08-08T20:35:12.000Z",
+              "-10": "2020-08-02T21:22:30.000Z",
+              "-50": "2020-07-26T11:40:24.000Z",
+              "-100": "2020-07-13T08:38:08.000Z"
+            }
           }
         },
         "liquidity": {
-          "count": 63,
-          "total": 879,
-          "percent": 7.167235494880546,
+          "count": 114,
+          "total": 2693,
+          "percent": 4.233197177868548,
           "analysis": {
-            "meanCount": 161.9047619047619,
-            "medianCount": 57,
-            "meanBlock": 10103653.111111112,
-            "medianBlock": 10095175,
-            "meanBlockDiff": 1141.3333333333333,
-            "medianBlockDiff": 126,
-            "modeBlockDiff": 11214
+            "meanCount": 876.140350877193,
+            "medianCount": 486.5,
+            "meanBlock": 10269783.640350876,
+            "medianBlock": 10165873,
+            "meanBlockDiff": 702.9824561403509,
+            "medianBlockDiff": 128,
+            "modeBlockDiff": 27,
+            "recentOccurrences": {
+              "-1": "2020-08-07T18:13:57.000Z",
+              "-10": "2020-07-31T10:09:51.000Z",
+              "-50": "2020-06-20T20:59:04.000Z",
+              "-100": "2020-05-16T04:09:58.000Z"
+            }
           }
         }
       }
@@ -67,31 +91,40 @@
     "percent:5": {
       "end-block:10200000": {
         "price": {
-          "count": 28,
-          "total": 11707,
-          "percent": 0.2391731442726574,
+          "count": 41,
+          "total": 112667,
+          "percent": 0.03639042488039976,
           "analysis": {
-            "meanCount": 345.07142857142856,
-            "medianCount": 32.5,
-            "meanBlock": 10082883.464285715,
-            "medianBlock": 10072608,
-            "meanBlockDiff": 277.10714285714283,
-            "medianBlockDiff": 5.5,
-            "modeBlockDiff": 0
+            "meanCount": 18119.048780487807,
+            "medianCount": 863,
+            "meanBlock": 10204774.341463415,
+            "medianBlock": 10110165,
+            "meanBlockDiff": 189.3658536585366,
+            "medianBlockDiff": 1,
+            "modeBlockDiff": 0,
+            "recentOccurrences": {
+              "-1": "2020-08-02T21:22:30.000Z",
+              "-10": "2020-06-23T02:43:01.000Z"
+            }
           }
         },
         "liquidity": {
-          "count": 40,
-          "total": 879,
-          "percent": 4.550625711035267,
+          "count": 53,
+          "total": 2693,
+          "percent": 1.9680653546230968,
           "analysis": {
-            "meanCount": 115.4,
-            "medianCount": 40,
-            "meanBlock": 10094999.35,
-            "medianBlock": 10092960,
-            "meanBlockDiff": 1677.1,
-            "medianBlockDiff": 142,
-            "modeBlockDiff": 11214
+            "meanCount": 496.0943396226415,
+            "medianCount": 57,
+            "meanBlock": 10182878.905660378,
+            "medianBlock": 10095175,
+            "meanBlockDiff": 1317.867924528302,
+            "medianBlockDiff": 154,
+            "modeBlockDiff": 34,
+            "recentOccurrences": {
+              "-1": "2020-08-06T10:41:25.000Z",
+              "-10": "2020-07-04T08:13:25.000Z",
+              "-50": "2020-05-12T11:46:00.000Z"
+            }
           }
         }
       }

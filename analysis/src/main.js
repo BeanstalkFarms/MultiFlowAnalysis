@@ -4,6 +4,7 @@ const abi = require('../../abis/uniswap.json');
 const SubgraphQueryUtil = require("./datasources/subgraph-query");
 const { calculateMean, calculateMedian, calculateMode } = require("./math");
 const fs = require('fs');
+const { providerThenable } = require("./datasources/alchemy");
 
 const USDC_WETH = "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc";
 
@@ -39,8 +40,73 @@ const PERCENT_THRESHOLDS = {
   ]
 };
 
+function querySwapsAndLiquidity(percent, block) {
+
+  let blockQuery =`block: {number: ${block}}`;
+  blockQuery = ''; // seems that block is not working with respect to the testing subgraph
+
+  const swapsPromise = SubgraphQueryUtil.allPaginatedSG(
+    multiflowSG,
+    `
+      {
+        swaps {
+          count
+          eventBlock
+          blockDiff
+        }
+      }
+    `,
+    blockQuery,
+    `pool: "${USDC_WETH}", percentPriceChange0_gt: "${percent}"`,
+    ['eventBlock'],
+    [0],
+    'asc'
+  );
+
+  const liquidityPromise = SubgraphQueryUtil.allPaginatedSG(
+    multiflowSG,
+    `
+      {
+        liquidities {
+          count
+          eventBlock
+          blockDiff
+        }
+      }
+    `,
+    blockQuery,
+    `pool: "${USDC_WETH}", percentLpSupplyChange_gt: "${percent}"`,
+    ['eventBlock'],
+    [0],
+    'asc'
+  );
+
+  return Promise.all([swapsPromise, liquidityPromise]);
+}
+
+async function queryRecentBlockTimes(provider, entities) {
+  const SPREAD = [-1, -10, -50, -100];
+  const promises = [];
+
+  const count = entities.length;
+  
+  for (const prev of SPREAD) {
+    if (count >= Math.abs(prev)) {
+      promises.push(provider.getBlock(parseInt(entities[count + prev].eventBlock)).then(b => new Date(b.timestamp * 1000)));
+    }
+  }
+
+  const resolved = await Promise.all(promises);
+  const results = {};
+  for (let i = 0; i < resolved.length; ++i) {
+    results[SPREAD[i]] = resolved[i];
+  }
+  return results;
+}
+
 (async () => {
 
+  const provider = await providerThenable;
   const report = {};
 
   const pools = (await multiflowSG(gql`
@@ -62,50 +128,16 @@ const PERCENT_THRESHOLDS = {
 
       const reportPercent = reportPool[`percent:${percent}`] = {};
       for (const block of POOL_BLOCKS) {
-
-        let blockQuery =`block: {number: ${block}}`;
-        blockQuery = ''; // seems that block is not working with respect to the testing subgraph
-
-        const swapsPromise = SubgraphQueryUtil.allPaginatedSG(
-          multiflowSG,
-          `
-            {
-              swaps {
-                count
-                eventBlock
-                blockDiff
-              }
-            }
-          `,
-          blockQuery,
-          `pool: "${USDC_WETH}", percentPriceChange0_gt: "${percent}"`,
-          ['eventBlock'],
-          [0],
-          'asc'
-        );
     
-        const liquidityPromise = SubgraphQueryUtil.allPaginatedSG(
-          multiflowSG,
-          `
-            {
-              liquidities {
-                count
-                eventBlock
-                blockDiff
-              }
-            }
-          `,
-          blockQuery,
-          `pool: "${USDC_WETH}", percentLpSupplyChange_gt: "${percent}"`,
-          ['eventBlock'],
-          [0],
-          'asc'
-        );
-    
-        const [swaps, liquidity] = await Promise.all([swapsPromise, liquidityPromise]);
+        const [swaps, liquidity] = await querySwapsAndLiquidity(percent, block);
 
         const priceSpread = meanAndMode(swaps, ['count', 'eventBlock', 'blockDiff']);
         const liquiditySpread = meanAndMode(liquidity, ['count', 'eventBlock', 'blockDiff']);
+
+        const [recentPrice, recentLiquidity] = await Promise.all([
+          queryRecentBlockTimes(provider, swaps),
+          queryRecentBlockTimes(provider, liquidity)
+        ]);
 
         reportPercent[`end-block:${block}`] = {
           price: {
@@ -119,7 +151,8 @@ const PERCENT_THRESHOLDS = {
               medianBlock: priceSpread.eventBlock.median,
               meanBlockDiff: priceSpread.blockDiff.mean,
               medianBlockDiff: priceSpread.blockDiff.median,
-              modeBlockDiff: priceSpread.blockDiff.mode
+              modeBlockDiff: priceSpread.blockDiff.mode,
+              recentOccurrences: recentPrice
             }
           },
           liquidity: {
@@ -133,19 +166,15 @@ const PERCENT_THRESHOLDS = {
               medianBlock: liquiditySpread.eventBlock.median,
               meanBlockDiff: liquiditySpread.blockDiff.mean,
               medianBlockDiff: liquiditySpread.blockDiff.median,
-              modeBlockDiff: liquiditySpread.blockDiff.mode
+              modeBlockDiff: liquiditySpread.blockDiff.mode,
+              recentOccurrences: recentLiquidity
             }
           }
         }
       }
     }
   }
-
   await fs.promises.writeFile(`results/analysis.json`, JSON.stringify(report, null, 2));
-
-  // const contract = await getContractAsync(USDC_WETH, abi);
-  // const reserves = await contract.callStatic.getReserves({blockTag: 10091796});
-  // console.log(reserves.map(BigInt));
 
 })();
 
