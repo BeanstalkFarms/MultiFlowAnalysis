@@ -19,6 +19,7 @@ export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   let entity = createSwapEntity(event);
   entity.pool = pool.id;
   entity.eventBlock = event.block.number;
+  entity.eventLogIndex = event.logIndex;
 
   if (pool.prevPrice) {
     entity.prevPrice = pool.prevPrice;
@@ -42,8 +43,8 @@ export function handleSwapEntity(poolAddress: string, event: SwapEvent): void {
   entity.txHash = event.transaction.hash.toHexString();
   entity.save();
 
-  pool.price = entity.newPrice;
   pool.prevSwap = entity.id;
+  pool.swapCount = pool.swapCount.plus(BigInt.fromU32(1));
   pool.prevEvent = entity.id;
   pool.prevEventType = "Swap";
   pool.save();

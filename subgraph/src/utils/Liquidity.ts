@@ -17,6 +17,7 @@ export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: 
   let entity = createLiquidityEntity(event);
   entity.pool = pool.id;
   entity.eventBlock = event.block.number;
+  entity.eventLogIndex = event.logIndex;
 
   if (prevEntity) {
     entity.prevPrice = pool.price;
@@ -32,6 +33,7 @@ export function handleLpTokenChange(poolAddress: string, amount: BigInt, event: 
   entity.save();
 
   pool.prevLiquidity = entity.id;
+  pool.liquidityCount = pool.liquidityCount.plus(BigInt.fromU32(1));
   pool.prevEvent = entity.id;
   pool.prevEventType = "Liquidity";
   pool.save();

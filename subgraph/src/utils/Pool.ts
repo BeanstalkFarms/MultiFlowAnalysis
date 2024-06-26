@@ -1,3 +1,4 @@
+import { BigInt } from "@graphprotocol/graph-ts";
 import { Pool } from "../../generated/schema";
 import { getTokensForPool } from "./PooledTokens";
 import { loadOrCreateToken } from "./Token";
@@ -10,6 +11,8 @@ export function loadOrCreatePool(poolAddress: string): Pool {
     for (let i = 0; i < pool.tokens.length; ++i) {
       loadOrCreateToken(pool.tokens[i]);
     }
+    pool.swapCount = BigInt.zero();
+    pool.liquidityCount = BigInt.zero();
     pool.save();
   }
   return pool;
