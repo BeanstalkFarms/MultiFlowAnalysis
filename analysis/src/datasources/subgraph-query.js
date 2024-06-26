@@ -12,12 +12,15 @@ class SubgraphQueryUtil {
    * @param {'asc' | 'desc'} paginateDirection - the direction to paginate
    * @returns all results matching the query
    *
-   * Note that graphql can only order by a single field, and therefore it is possible for
-   * some results to be skipped in the case of paginating by multiple fields
+   * Note that graph protocol can only order by a single field, and therefore it is possible for
+   * some results to be skipped in the case of paginating by multiple fields. For this reason, there is
+   * some overlap added between the pages, which is filtered out using prevPageIds list.
    */
   static async allPaginatedSG(subgraphClient, query, block, where, paginateFields, firstValues, paginateDirection) {
-    const PAGE_SIZE = 1000;
-    const whereSuffix = paginateDirection === 'asc' ? '_gt' : '_lt';
+    const PAGE_SIZE = 100;
+    const whereSuffix = paginateDirection === 'asc' ? '_gte' : '_lte';
+
+    let prevPageIds = [];
 
     const retval = [];
     while (firstValues[0] !== undefined) {
@@ -32,8 +35,15 @@ class SubgraphQueryUtil {
       });
       const result = await subgraphClient(paginatedQuery);
 
-      // Record the results and repeat as necessary
-      retval.push(...result[entityName]);
+      // Record the results and repeat as necessary. Filter any repeated results on overlapping pages.
+      const pageIds = [];
+      for (const r of result[entityName]) {
+        if (!prevPageIds.includes(r.id)) {
+          pageIds.push(r.id);
+          retval.push(r);
+        }
+      }
+      prevPageIds = pageIds;
       firstValues = paginateFields.map((v) => result[entityName][PAGE_SIZE - 1]?.[v]);
     }
     return retval;
