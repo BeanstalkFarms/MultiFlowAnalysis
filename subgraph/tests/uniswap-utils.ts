@@ -4,7 +4,7 @@ import {
   Swap,
   Sync,
   Transfer
-} from "../generated/uniswap/uniswap"
+} from "../generated/wethusdc/uniswap"
 
 export function createSwapEvent(
   sender: Address,

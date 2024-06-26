@@ -4,7 +4,7 @@ import {
   Swap as SwapEvent,
   Sync as SyncEvent,
   Transfer as TransferEvent
-} from "../generated/uniswap/uniswap"
+} from "../generated/wethusdc/uniswap"
 import { handleLpTokenChange } from "./utils/Liquidity"
 import { loadOrCreateToken, toDecimal } from "./utils/Token"
 import { handleSwapEntity } from "./utils/Swap"
