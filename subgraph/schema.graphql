@@ -34,6 +34,7 @@ type Swap @entity {
   pool: Pool!
   eventBlock: BigInt!
   eventLogIndex: BigInt!
+  count: BigInt!
   "The block number in which the next Swap in this pool occurs. Must be updated later once that event is encountered"
   nextEventBlock: BigInt
   blockDiff: BigInt
@@ -58,6 +59,7 @@ type Liquidity @entity {
   pool: Pool!
   eventBlock: BigInt!
   eventLogIndex: BigInt!
+  count: BigInt!
   "The block number in which the next Liquidity in this pool occurs. Must be updated later once that event is encountered"
   nextEventBlock: BigInt
   blockDiff: BigInt

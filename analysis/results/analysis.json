@@ -1,0 +1,100 @@
+{
+  "pool:0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc": {
+    "percent:1.5": {
+      "end-block:10200000": {
+        "price": {
+          "count": 97,
+          "total": 11707,
+          "percent": 0.8285641069445632,
+          "analysis": {
+            "meanCount": 3207.9278350515465,
+            "medianCount": 944,
+            "meanBlock": 10148729.113402061,
+            "medianBlock": 10110971,
+            "meanBlockDiff": 185.71134020618555,
+            "medianBlockDiff": 1,
+            "modeBlockDiff": 0
+          }
+        },
+        "liquidity": {
+          "count": 69,
+          "total": 879,
+          "percent": 7.849829351535837,
+          "analysis": {
+            "meanCount": 165.6231884057971,
+            "medianCount": 60,
+            "meanBlock": 10104977.11594203,
+            "medianBlock": 10095564,
+            "meanBlockDiff": 1051.623188405797,
+            "medianBlockDiff": 126,
+            "modeBlockDiff": 163
+          }
+        }
+      }
+    },
+    "percent:2": {
+      "end-block:10200000": {
+        "price": {
+          "count": 66,
+          "total": 11707,
+          "percent": 0.5637652686426924,
+          "analysis": {
+            "meanCount": 2247.5151515151515,
+            "medianCount": 676,
+            "meanBlock": 10127784.712121213,
+            "medianBlock": 10105793.5,
+            "meanBlockDiff": 270.3030303030303,
+            "medianBlockDiff": 1,
+            "modeBlockDiff": 0
+          }
+        },
+        "liquidity": {
+          "count": 63,
+          "total": 879,
+          "percent": 7.167235494880546,
+          "analysis": {
+            "meanCount": 161.9047619047619,
+            "medianCount": 57,
+            "meanBlock": 10103653.111111112,
+            "medianBlock": 10095175,
+            "meanBlockDiff": 1141.3333333333333,
+            "medianBlockDiff": 126,
+            "modeBlockDiff": 11214
+          }
+        }
+      }
+    },
+    "percent:5": {
+      "end-block:10200000": {
+        "price": {
+          "count": 28,
+          "total": 11707,
+          "percent": 0.2391731442726574,
+          "analysis": {
+            "meanCount": 345.07142857142856,
+            "medianCount": 32.5,
+            "meanBlock": 10082883.464285715,
+            "medianBlock": 10072608,
+            "meanBlockDiff": 277.10714285714283,
+            "medianBlockDiff": 5.5,
+            "modeBlockDiff": 0
+          }
+        },
+        "liquidity": {
+          "count": 40,
+          "total": 879,
+          "percent": 4.550625711035267,
+          "analysis": {
+            "meanCount": 115.4,
+            "medianCount": 40,
+            "meanBlock": 10094999.35,
+            "medianBlock": 10092960,
+            "meanBlockDiff": 1677.1,
+            "medianBlockDiff": 142,
+            "modeBlockDiff": 11214
+          }
+        }
+      }
+    }
+  }
+}
