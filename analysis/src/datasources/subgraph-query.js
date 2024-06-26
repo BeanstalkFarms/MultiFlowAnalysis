@@ -17,7 +17,7 @@ class SubgraphQueryUtil {
    * some overlap added between the pages, which is filtered out using prevPageIds list.
    */
   static async allPaginatedSG(subgraphClient, query, block, where, paginateFields, firstValues, paginateDirection) {
-    const PAGE_SIZE = 100;
+    const PAGE_SIZE = 1000;
     const whereSuffix = paginateDirection === 'asc' ? '_gte' : '_lte';
 
     let prevPageIds = [];
