@@ -38,8 +38,8 @@ const BLOCKS = {
 
 // Minimum block for which to consider results for each pool
 const MIN_BLOCKS = {
-  [USDC_WETH]: 10133793,
-  [WETH_USDT]: 10552612
+  [USDC_WETH]: 10133793, // first event: 10008555
+  [WETH_USDT]: 10552612  // first event: 10093341
 }
 
 // Percent thresholds for which to include results
