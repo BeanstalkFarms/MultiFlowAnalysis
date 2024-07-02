@@ -34,3 +34,6 @@
 **/cache
 
 **/.DS_Store
+
+analysis/results/*
+!analysis/results/analysis.json

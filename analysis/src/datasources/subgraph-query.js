@@ -35,6 +35,10 @@ class SubgraphQueryUtil {
       });
       const result = await subgraphClient(paginatedQuery);
 
+      if (!result[entityName][0].id) {
+        throw new Error("field `id` was not present on the returned entity");
+      }
+
       // Record the results and repeat as necessary. Filter any repeated results on overlapping pages.
       const pageIds = [];
       for (const r of result[entityName]) {

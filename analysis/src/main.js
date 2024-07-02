@@ -36,11 +36,17 @@ const BLOCKS = {
   ]
 };
 
+// Minimum block for which to consider results for each pool
+const MIN_BLOCKS = {
+  [USDC_WETH]: 10133793,
+  [WETH_USDT]: 10552612
+}
+
 // Percent thresholds for which to include results
 const PERCENT_THRESHOLDS = {
   [USDC_WETH]: [
-    0.01,
-    0.05,
+    // 0.01,
+    // 0.05,
     0.1,
     0.25,
     0.5,
@@ -51,8 +57,8 @@ const PERCENT_THRESHOLDS = {
     5
   ],
   [WETH_USDT]: [
-    0.01,
-    0.05,
+    // 0.01,
+    // 0.05,
     0.1,
     0.25,
     0.5,
@@ -64,16 +70,17 @@ const PERCENT_THRESHOLDS = {
   ]
 };
 
-function querySwapsAndLiquidity(pool, percent, block) {
+function querySwapsAndLiquidity(pool, percent, block, minBlock) {
 
-  let blockQuery =`block: {number: ${block}}`;
-  blockQuery = ''; // seems that block is not working on this subgraph?
+  let blockQuery = `block: {number: ${block}}`;
+  blockQuery = ''; // ignoring this functionality for now
 
   const swapsPromise = SubgraphQueryUtil.allPaginatedSG(
     multiflowSG,
     `
       {
         swaps {
+          id
           count
           eventBlock
           blockDiff
@@ -81,8 +88,8 @@ function querySwapsAndLiquidity(pool, percent, block) {
       }
     `,
     blockQuery,
-    `pool: "${pool}", percentPriceChange0_gt: "${percent}"`,
-    ['eventBlock'],
+    `pool: "${pool}", percentPriceChange0_gt: "${percent}", eventBlock_gte: "${minBlock}"`,
+    ['count'],
     [0],
     'asc'
   );
@@ -92,6 +99,7 @@ function querySwapsAndLiquidity(pool, percent, block) {
     `
       {
         liquidities {
+          id
           count
           eventBlock
           blockDiff
@@ -99,13 +107,26 @@ function querySwapsAndLiquidity(pool, percent, block) {
       }
     `,
     blockQuery,
-    `pool: "${pool}", percentLpSupplyChange_gt: "${percent}"`,
-    ['eventBlock'],
+    `pool: "${pool}", percentLpSupplyChange_gt: "${percent}", eventBlock_gte: "${minBlock}"`,
+    ['count'],
     [0],
     'asc'
   );
 
   return Promise.all([swapsPromise, liquidityPromise]);
+}
+
+async function queryEarlyCounts(pool, block) {
+  const poolData = await multiflowSG(
+    `
+      {
+        pool(id: "${pool}", block: {number: ${block}}) {
+          swapCount
+          liquidityCount
+        }
+      }
+    `);
+  return [poolData.pool.swapCount, poolData.pool.liquidityCount];
 }
 
 async function queryRecentBlockTimes(provider, entities) {
@@ -161,7 +182,9 @@ async function queryRecentBlockTimes(provider, entities) {
 
         process.stdout.write(`\rPool: ${poolIterations[0]} / ${poolIterations[1]} | Step: ${inPoolIterations[0]++} / ${inPoolIterations[1]}`);
     
-        const [swaps, liquidity] = await querySwapsAndLiquidity(pool.id, percent, block);
+        // Get the number of relevant swaps, filtering out any that occurred prior to a given block.
+        const [swaps, liquidity] = await querySwapsAndLiquidity(pool.id, percent, block, MIN_BLOCKS[pool.id]);
+        const [earlySwapCount, earlyLiquidityCount] = await queryEarlyCounts(pool.id, MIN_BLOCKS[pool.id]);
 
         const priceSpread = meanMedianMode(swaps, ['count', 'eventBlock', 'blockDiff']);
         const liquiditySpread = meanMedianMode(liquidity, ['count', 'eventBlock', 'blockDiff']);
@@ -171,11 +194,14 @@ async function queryRecentBlockTimes(provider, entities) {
           queryRecentBlockTimes(provider, liquidity)
         ]);
 
+        const totalSwap = pool.swapCount - earlySwapCount;
+        const totalLiquidity = pool.liquidityCount - earlyLiquidityCount;
+
         reportPercent[`end-block:${block}`] = {
           price: {
             count: swaps.length,
-            total: parseInt(pool.swapCount),
-            percent: (swaps.length / pool.swapCount) * 100,
+            total: totalSwap,
+            percent: (swaps.length / totalSwap) * 100,
             analysis: {
               meanCount: priceSpread.count.mean,
               medianCount: priceSpread.count.median,
@@ -189,8 +215,8 @@ async function queryRecentBlockTimes(provider, entities) {
           },
           liquidity: {
             count: liquidity.length,
-            total: parseInt(pool.liquidityCount),
-            percent: (liquidity.length / pool.liquidityCount) * 100,
+            total: totalLiquidity,
+            percent: (liquidity.length / totalLiquidity) * 100,
             analysis: {
               meanCount: liquiditySpread.count.mean,
               medianCount: liquiditySpread.count.median,
